@@ -9,4 +9,8 @@ class ProducerService {
         rabbitSend "fooNonTxn", msg
     }
 
+    void sendTxnMessage(String msg) {
+        rabbitSend "fooTxn", msg
+    }
+
 }
