@@ -4,15 +4,12 @@ import com.rabbitmq.client.Channel
 import geb.spock.GebSpec
 import grails.core.GrailsApplication
 import grails.test.mixin.integration.Integration
-import grails.transaction.Rollback
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import rabbitmqdemo.MessageStatus
 import rabbitmqdemo.ProducerService
-import spock.lang.IgnoreRest
 
 @Integration
-@Rollback
 class MainSpec extends GebSpec {
 
     @Autowired
@@ -24,27 +21,27 @@ class MainSpec extends GebSpec {
 
     void testNonTransactionalWithNormalMessage() {
         expect:
-        MessageStatus.count() == 0
+        messageCount == 0
 
         when:
         producerService.sendNonTxnMessage("Hello World")
 
         then: "A MessageStatus message should be saved."
         waitFor(1, 0.5) {
-            MessageStatus.count() == 1
+            messageCount == 1
         }
     }
 
     void testNonTransactionalWithError() {
         expect:
-        MessageStatus.count() == 0
+        messageCount == 0
 
         when:
         producerService.sendNonTxnMessage('throw exception')
 
         then: "A MessageStatus message shouldn't be saved."
         waitFor(1) {
-            MessageStatus.count() == 0
+            messageCount == 0
         }
 
         when: // Check that the message has *not* remained on the queue.
@@ -58,27 +55,27 @@ class MainSpec extends GebSpec {
 
     void testTransactionalWithNormalMessage() {
         expect:
-        MessageStatus.count() == 0
+        messageCount == 0
 
         when:
         producerService.sendTxnMessage("Hello world")
 
         then:
         waitFor(1) {
-            MessageStatus.count() == 0
+            messageCount == 1
         }
     }
 
     void testTransactionalWithError() {
         expect:
-        MessageStatus.count() == 0
+        messageCount == 0
 
         when:
         producerService.sendTxnMessage("throw exception")
 
         then: "A MessageStatus message shouldn't be saved."
         waitFor(1, 0.5) {
-            MessageStatus.count() == 0
+            messageCount == 0
         }
 
         when:
@@ -104,6 +101,12 @@ class MainSpec extends GebSpec {
     void cleanup() {
         MessageStatus.withNewSession {
             MessageStatus.executeUpdate('delete MessageStatus ')
+        }
+    }
+
+    private Integer getMessageCount() {
+        MessageStatus.withNewSession {
+            MessageStatus.count()
         }
     }
 
