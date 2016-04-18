@@ -64,7 +64,7 @@ dependencies {
     runtime "org.grails.plugins:asset-pipeline"
     runtime "org.grails.plugins:scaffolding"
 
-    compile "org.grails.plugins:grails-rabbitmq:2.0.0"
+    compile "org.grails.plugins:rabbitmq:2.0.0"
 
     testCompile "org.grails:grails-plugin-testing"
     testCompile "org.grails.plugins:geb"
